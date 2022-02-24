@@ -1,7 +1,6 @@
 import UIKit
 import SceneKit
 import ARKit
-//import EyeTracking
 
 class ViewController: UIViewController, ARSCNViewDelegate {
     
@@ -96,7 +95,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                 while i < queue.count{
                     acct += queue[i]
                 }
-                acct = acct - purged + 15
+                acct = acct - purged + timestampDifference
+                print("Acct \(acct)")
                 //what to do with acct?
             }
             
