@@ -4,7 +4,7 @@ import ARKit
 //import EyeTracking
 
 class ViewController: UIViewController, ARSCNViewDelegate {
-
+    
     //declaring view & variables
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet weak var faceLabel: UILabel!
@@ -12,7 +12,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var analysis = ""
     var blink = false
     //let eyeTracking = EyeTracking(configuration: Configuration(appID: "Somnos", blendShapes: [.eyeBlinkLeft, .eyeBlinkRight]))
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -29,7 +29,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         // Create a session configuration
         let configuration = ARFaceTrackingConfiguration()
-
+        
         // Run the view's session
         sceneView.session.run(configuration)
     }
@@ -73,10 +73,10 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let Rval = Double(truncating: blinkRight ?? 0.0)
         self.analysis = "Left blink = \(round(Lval*10)/10.0) & Right blink = \(round(Rval*10)/10.0)\n"
         
-
-        
-        if ((blinkLeft?.decimalValue ?? 0.0 > 0.75) && (blinkRight?.decimalValue ?? 0.0 > 0.75)) {
-            self.analysis += "\nYou are blinking."
+        //blink check
+        if (((blinkLeft?.decimalValue ?? 0.0 > 0.75) && (blinkRight?.decimalValue ?? 0.0 > 0.75)) && !blink){
+            blink = true
+            print("Blink: \(blink)")
             
             var acct = 0.0
             var queue: [Double] = []
@@ -85,7 +85,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             timestamp = newtimestamp
             queue.append(timestampDifference)
             self.analysis += "\(queue[0])"
-            //print("Queue: \(queue)")
             for i in queue{
                 print (i)
             }
@@ -98,7 +97,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
                     acct += queue[i]
                 }
                 acct = acct - purged + 15
+                //what to do with acct?
             }
+            
+        } else if (blinkLeft?.decimalValue ?? 0.0 < 0.75) && (blinkRight?.decimalValue ?? 0.0 < 0.75) {
+            blink = false
         }
         
     }
