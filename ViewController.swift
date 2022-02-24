@@ -10,7 +10,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var timestamp = NSDate().timeIntervalSince1970
     var analysis = ""
     var blink = false
-    //let eyeTracking = EyeTracking(configuration: Configuration(appID: "Somnos", blendShapes: [.eyeBlinkLeft, .eyeBlinkRight]))
+    var acct: Float = 0.0
+    let threshold: Float = 10
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,10 +78,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             blink = true
             print("Blink: \(blink)")
             
-            var acct = 0.0
+            //var acct = 0.0
             var queue: [Double] = []
             let newtimestamp = NSDate().timeIntervalSince1970
             let timestampDifference = abs(newtimestamp - timestamp)
+            acct += Float(timestampDifference)
             timestamp = newtimestamp
             queue.append(timestampDifference)
             self.analysis += "\(queue[0])"
@@ -89,15 +91,12 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             }
             //add wait
             if (queue.count > 30){
-                let purged = queue[0]
                 queue.remove(at: 0)
-                let i = 15
-                while i < queue.count{
-                    acct += queue[i]
+                if (acct > threshold){
+                    acct = 0
+                    //DO STATISTICS!!!!
                 }
-                acct = acct - purged + timestampDifference
                 print("Acct \(acct)")
-                //what to do with acct?
             }
             
         } else if (blinkLeft?.decimalValue ?? 0.0 < 0.75) && (blinkRight?.decimalValue ?? 0.0 < 0.75) {
