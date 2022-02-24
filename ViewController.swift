@@ -8,9 +8,11 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet weak var faceLabel: UILabel!
     var timestamp = NSDate().timeIntervalSince1970
+    var queue: [Double] = []
     var analysis = ""
     var blink = false
     var acct: Float = 0.0
+    
     let threshold: Float = 10
     
     override func viewDidLoad() {
@@ -76,27 +78,26 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         //blink check
         if (((blinkLeft?.decimalValue ?? 0.0 > 0.75) && (blinkRight?.decimalValue ?? 0.0 > 0.75)) && !blink){
             blink = true
-            print("Blink: \(blink)")
+            //print("Blink: \(blink)")
             
             //var acct = 0.0
-            var queue: [Double] = []
             let newtimestamp = NSDate().timeIntervalSince1970
             let timestampDifference = abs(newtimestamp - timestamp)
             acct += Float(timestampDifference)
             timestamp = newtimestamp
             queue.append(timestampDifference)
             self.analysis += "\(queue[0])"
-            for i in queue{
-                print (i)
-            }
-            //add wait
+            
+            //dump(queue)
+            print("Acct\(acct)")
+            
+            //add wait maybe
             if (queue.count > 30){
                 queue.remove(at: 0)
                 if (acct > threshold){
-                    acct = 0
+                    acct = 0.0
                     //DO STATISTICS!!!!
                 }
-                print("Acct \(acct)")
             }
             
         } else if (blinkLeft?.decimalValue ?? 0.0 < 0.75) && (blinkRight?.decimalValue ?? 0.0 < 0.75) {
