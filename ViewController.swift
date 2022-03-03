@@ -1,3 +1,9 @@
+// 1. Light & face status tracking/notification
+// 2. Sound notification system (set sound for now, add ability to choose sounds later?)
+// 3. ui dev (include sound selection screen & home screen)
+// 4. fine tune values
+// 5. if time we add the calling feature potentially
+
 import UIKit
 import SceneKit
 import ARKit
@@ -153,7 +159,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         print("Lightestimate:\(lightEstimate)")
         
         if (lightEstimate < 50) {
-            print("Lighting is too dark")
+            //print("Lighting is too dark")
             light = false
         } else {
             light = true
@@ -161,7 +167,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
         if (!light && !onCooldown){
             onCooldown = true
-            let seconds = 5.0
+            let seconds = 2.5
             DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
                 if (!self.light){
                     print("It's too dark")
