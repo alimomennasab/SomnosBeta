@@ -34,6 +34,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var analysis = ""
     var blink = false
     var acct: Float = 0.0
+    var light = true
+    var onCooldown = false
     var player: AVAudioPlayer?
     //add timer
     
@@ -149,10 +151,23 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         let frame = sceneView.session.currentFrame
         let lightEstimate = Int (frame?.lightEstimate?.ambientIntensity ?? 0)
         print("Lightestimate:\(lightEstimate)")
-        if lightEstimate < 100 {
+        
+        if (lightEstimate < 50) {
             print("Lighting is too dark")
+            light = false
         } else {
-            print("Lighting good")
+            light = true
+        }
+        
+        if (!light && !onCooldown){
+            onCooldown = true
+            let seconds = 5.0
+            DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+                if (!self.light){
+                    print("It's too dark")
+                }
+                self.onCooldown = false
+            }
         }
         
         status = anchor.isTracked ? "Tracking working" : "Reposition"
