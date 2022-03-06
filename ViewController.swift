@@ -1,8 +1,13 @@
-// 1. Light & face status tracking/notification
-// 2. Sound notification system (set sound for now, add ability to choose sounds later?)
-// 3. ui dev (include sound selection screen & home screen)
-// 4. fine tune values
-// 5. if time we add the calling feature potentially
+// Sound notification system (set sound for now, add ability to choose sounds later?)
+// Add feature showing length of drive using DispatchTime, warnings for exceeding time threshold to take a break
+// UI
+//      Light & face status tracking/notification (only need ui)
+//      Sound selection screen
+//      Home screen
+//      Camera screen
+//      Create animation for camera screen (low priority)
+// Fine tune values
+// If time we add the calling feature potentially
 
 import UIKit
 import SceneKit
@@ -21,7 +26,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     
     @IBAction func resetButton(_ sender: Any) {
         
-        //print("Reset button pressed")
+        print("Reset button pressed")
+        playSound()
     }
     
     @IBAction func awakeButton(_ sender: Any) {
@@ -43,6 +49,8 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     var light = true
     var onCooldown = false
     var player: AVAudioPlayer?
+    
+    
     //add timer
     
     let threshold: Float = 10
@@ -50,8 +58,9 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        //var timer = Timer.scheduledTimer(timeInterval: 0.4, target: self, selector: update(), userInfo: nil, repeats: true)
+        
         sceneView.delegate = self
-        //sceneView.showsStatistics = true
         guard ARFaceTrackingConfiguration.isSupported else {
             fatalError("Face tracking is not supported on this device.")
         }
@@ -138,12 +147,17 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
     }
     
+    func update (){
+        print("Update") //placeholder
+    }
+    
     func statistics () {
         let x = 60 * 30 / queue.avg();
         print(queue.avg())
         if(x < 10.2){
             //sleepy (maybe have a temperary popup for now)
             print("You are sleepy")
+            playSound()
         }
         if(x > 15){
             //they need to see a doctor
@@ -159,7 +173,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         print("Lightestimate:\(lightEstimate)")
         
         if (lightEstimate < 50) {
-            //print("Lighting is too dark")
+            print("Lighting is too dark")
             light = false
         } else {
             light = true
@@ -177,10 +191,27 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
         
         status = anchor.isTracked ? "Tracking working" : "Reposition"
-        
         return status
     }
-}
+    
+    func playSound() {
+        guard let url = Bundle.main.url(forResource: "bleep", withExtension: "mp3") else { return }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+
+            /* The following line is required for the player to work on iOS 11. Change the file type accordingly*/
+            player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.mp3.rawValue)
+
+            guard let player = player else { return }
+
+            player.play()
+
+        } catch let error {
+            print(error.localizedDescription)
+        }
+    }
 
 extension Array where Element: FloatingPoint {
     
