@@ -125,7 +125,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
-    // MARK: - Checking For Blinking
+    // MARK: - Blink Check Function
     func expression(anchor: ARFaceAnchor) {
         print(checkFaceStatus(anchor: anchor))
         //cause mirrored or smthn
@@ -165,6 +165,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         
     }
     
+    // MARK: Statistics Function
     func statistics () {
         let x = 60 * 30 / queue.avg();
         print(queue.avg())
@@ -179,6 +180,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         }
     }
     
+    //MARK: Light & Face Status Function
     func checkFaceStatus (anchor: ARFaceAnchor) -> String {
         var status = ""
         // move the light estimation to another
@@ -209,6 +211,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         return status
     }
     
+    //MARK: Sound Functions
     func playSound() {
         guard let url = Bundle.main.url(forResource: "bleep", withExtension: "mp3") else { return }
         
@@ -228,6 +231,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             print(error.localizedDescription)
         }
     }
+    
     @objc func updateTimer() {
         count = count + 1
         let time = secondsToHoursMinutesSeconds(seconds: count)
@@ -248,6 +252,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
     }
 }
 
+//MARK: Extensions
 extension Array where Element: FloatingPoint {
     
     func sum() -> Element {
