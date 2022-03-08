@@ -1,5 +1,5 @@
-// Sound notification system (set sound for now, add ability to choose sounds later?)
-// Add feature showing length of drive using DispatchTime, warnings for exceeding time threshold to take a break
+//Functionality
+//      App runs in background
 // UI
 //      Light & face status tracking/notification (only need ui)
 //      Sound selection screen
@@ -7,58 +7,77 @@
 //      Camera screen
 //      Create animation for camera screen (low priority)
 // Fine tune values
-// If time we add the calling feature potentially
 
 import UIKit
 import SceneKit
 import ARKit
 import AVFoundation
-
 class ViewController: UIViewController, ARSCNViewDelegate {
     
     //declaring view & variables
     @IBOutlet var sceneView: ARSCNView!
     @IBOutlet weak var faceLabel: UILabel!
+    @IBOutlet weak var timerLabel: UILabel!
+    @IBOutlet weak var startStopButton: UIButton!
     
-    
-    // MARK: Debuggers
-    @IBOutlet weak var testLabel: UILabel!
-    
-    @IBAction func resetButton(_ sender: Any) {
-        
-        print("Reset button pressed")
-        playSound()
-    }
-    
-    @IBAction func awakeButton(_ sender: Any) {
-        
-        print("Awake button pressed")
-    }
-    
-    @IBAction func sleepyButton(_ sender: Any) {
-        
-        print("Sleepy button presse")
-    }
-    
-    
+    //blink detection variables
     var timestamp = NSDate().timeIntervalSince1970
     var queue: [Double] = []
     var analysis = ""
     var blink = false
     var acct: Float = 0.0
+    
+    //light status variables
     var light = true
     var onCooldown = false
     var player: AVAudioPlayer?
     
+    //timer variables
+    var timer = Timer()
+    var count = 0
+    var timerCounting = false
     
-    //add timer
-    
+    //constants
     let threshold: Float = 10
+    
+    // MARK: Debuggers
+    @IBOutlet weak var testLabel: UILabel!
+    
+    @IBAction func resetButton(_ sender: Any) {
+        count = 0
+        print("Reset button pressed")
+        playSound()
+    }
+    
+    @IBAction func awakeButton(_ sender: Any) {
+        print("Awake button pressed")
+    }
+    
+    @IBAction func sleepyButton(_ sender: Any) {
+        print("Sleepy button presse")
+    }
+    
+    @IBAction func startStopTapped(_ sender: Any) {
+        if(timerCounting)
+                {
+                    timerCounting = false
+                    timer.invalidate()
+                    startStopButton.setTitle("START", for: .normal)
+                    startStopButton.setTitleColor(UIColor.green, for: .normal)
+                }
+                else
+                {
+                    timerCounting = true
+                    startStopButton.setTitle("STOP", for: .normal)
+                    startStopButton.setTitleColor(UIColor.red, for: .normal)
+                    timer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true, block: { _ in
+                        self.updateTimer()
+                    })
+                }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        //var timer = Timer.scheduledTimer(timeInterval: 0.4, target: self, selector: update(), userInfo: nil, repeats: true)
         
         sceneView.delegate = self
         guard ARFaceTrackingConfiguration.isSupported else {
@@ -144,11 +163,6 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             blink = false
         }
         
-        
-    }
-    
-    func update (){
-        print("Update") //placeholder
     }
     
     func statistics () {
@@ -173,7 +187,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
         print("Lightestimate:\(lightEstimate)")
         
         if (lightEstimate < 50) {
-            print("Lighting is too dark")
+            //print("Lighting is too dark")
             light = false
         } else {
             light = true
@@ -185,6 +199,7 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
                 if (!self.light){
                     print("It's too dark")
+                    self.playSound()
                 }
                 self.onCooldown = false
             }
@@ -201,16 +216,35 @@ class ViewController: UIViewController, ARSCNViewDelegate {
             try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
             try AVAudioSession.sharedInstance().setActive(true)
             
-            /* The following line is required for the player to work on iOS 11. Change the file type accordingly*/
             player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.mp3.rawValue)
             
             guard let player = player else { return }
+            player.numberOfLoops = 5
+            player.setVolume(75, fadeDuration: 1)
             
             player.play()
             
         } catch let error {
             print(error.localizedDescription)
         }
+    }
+    @objc func updateTimer() {
+        count = count + 1
+        let time = secondsToHoursMinutesSeconds(seconds: count)
+        let timeString = makeTimeString(hours: time.0, minutes: time.1, seconds: time.2)
+        timerLabel.text = timeString
+    }
+    func secondsToHoursMinutesSeconds(seconds: Int) -> (Int, Int, Int) {
+        return ((seconds / 3600), ((seconds % 3600) / 60),((seconds % 3600) % 60))
+    }
+    func makeTimeString(hours: Int, minutes: Int, seconds : Int) -> String  {
+        var timeString = ""
+        timeString += String(format: "%02d", hours)
+        timeString += " : "
+        timeString += String(format: "%02d", minutes)
+        timeString += " : "
+        timeString += String(format: "%02d", seconds)
+        return timeString
     }
 }
 
